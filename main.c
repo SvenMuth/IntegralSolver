@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ERROR_PRINT(args ...)    fprintf(stderr, args)
 
 typedef enum TYPE
 {
-    EXPONENT,
     NUMBER,
+    VARIABLE,
+    EXPONENT,
     UNINITIALIZED,
 
     PARENTHESE_OPEN = 40,
@@ -34,11 +36,30 @@ void generate_token(token_t* token, const TYPE type, const char content)
     };
 }
 
+void print_tokens(const token_t* tokens)
+{
+    for (int i = 0; i < 1000; i++)
+    {
+        if (tokens[i].type == UNINITIALIZED)
+        {
+            break;
+        }
+
+        printf("content: %c     type: %d\n", tokens[i].content, tokens[i].type);
+    }
+
+}
+
 int main(void)
 {
-    const char* integral = "x³+2x²-4x+5";
+    const char* integral = "x ^ 3 + 2 x ^ 2 - 4 x + 5";
 
     token_t* tokens = malloc(sizeof(token_t) * 1000);
+    if (tokens == nullptr)
+    {
+        ERROR_PRINT("Memory allocation failed!");
+        return EXIT_FAILURE;
+    }
 
     for (int i = 0; i < 1000; i++)
     {
@@ -53,7 +74,7 @@ int main(void)
 
     for (int i = 0; i < strlen(integral); i++)
     {
-        char c = integral[i];
+        const char c = integral[i];
         if (isspace(c) || iscntrl(c))
         {
             continue;
@@ -62,6 +83,10 @@ int main(void)
         if (isdigit(c))
         {
             type = NUMBER;
+        }
+        if (isalpha(c))
+        {
+            type = VARIABLE;
         }
 
         switch (c)
@@ -101,6 +126,8 @@ int main(void)
         generate_token(&tokens[token_index], type, c);
         token_index++;
     }
+
+    print_tokens(tokens);
 
     free(tokens);
     return EXIT_SUCCESS;
