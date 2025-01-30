@@ -4,7 +4,12 @@ project(IntegralSolver C)
 set(CMAKE_C_STANDARD 23)
 
 add_executable(IntegralSolver main.c
-        main.h
         math.c
-        math.h)
+        math.h
+        tokenizer.c
+        tokenizer.h
+        commons.h
+        process_tokens.c
+        process_tokens.h)
+
 target_link_libraries(IntegralSolver m)
