@@ -3,4 +3,5 @@ project(IntergralSolver C)
 
 set(CMAKE_C_STANDARD 23)
 
-add_executable(IntergralSolver main.c)
+add_executable(IntergralSolver main.c
+        main.h)
