@@ -1,3 +1,3 @@
-# Integral Solver in C
+# Integral Solver in C (In progress)
 
-Just started. Nothing spectacular to see here.
+Just started. Nothing to see here.
