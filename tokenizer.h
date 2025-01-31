@@ -12,6 +12,7 @@ typedef enum type
     EXPONENT,
     UNINITIALIZED,
 
+    PLACEHOLDER_NUMBER  = 37,
     PARENTHESE_OPEN     = 40,
     PARENTHESE_CLOSE    = 41,
     MULTIPLICATION      = 42,
@@ -27,7 +28,7 @@ typedef struct token
     type_t type;
 } token_t;
 
-
+token_t* default_initialization_tokens();
 token_t* tokenize(const char* integral);
 void generate_token(token_t* token, type_t type, char content);
 void print_tokens(const token_t* tokens);

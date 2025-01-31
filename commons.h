@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#define SIZE_TOKENS                 1000
+#define SIZE_TOKENS                 50
 #define ERROR_PRINT(args ...)       fprintf(stderr, args)
 
 #endif //COMMONS_H

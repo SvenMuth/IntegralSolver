@@ -2,146 +2,99 @@
 // Created by sven on 30.01.25.
 //
 
-#include "process_tokens.h"
-
 #include <stdlib.h>
 
-//Need to check left side?
-bool check_left_token_mul_or_div(const token_t* tokens, const int index)
+#include "process_tokens.h"
+#include "commons.h"
+
+
+void strip_numbers_token(token_t* tokens)
 {
-    type_t type_left = UNINITIALIZED;
-    if (index - 1 >= 0)
+    token_t* token_with_placeholders = default_initialization_tokens();
+    int index = 0;
+
+    int tmp = -1;
+    int digits = 1;
+    char* buffer = nullptr;
+    for (int i = 0; i < SIZE_TOKENS; i++)
     {
-        type_left = tokens[index - 1].type;
+        if (tokens[i].type == NUMBER)
+        {
+            int index_buffer = 0;
+            digits = 1;
+
+            buffer = malloc(sizeof(char) * digits);
+            buffer[index_buffer] = tokens[i].token_c;
+
+            tmp = i + 1;
+            while (check_is_token_number(tokens, tmp))
+            {
+                index_buffer++;
+                digits++;
+
+                buffer = realloc(buffer, sizeof(char) * digits);
+                buffer[index_buffer] = tokens[tmp].token_c;
+                tmp++;
+            }
+
+            i = tmp + 1;
+
+            digits++;
+            index_buffer++;
+            buffer = realloc(buffer, sizeof(char) * digits);
+            buffer[index_buffer] = 0;
+            int number = (int)strtol(buffer, nullptr, 10);
+
+            token_with_placeholders[index] = (token_t){'%', PLACEHOLDER_NUMBER};
+            index++;
+            continue;
+        }
+        token_with_placeholders[index] = tokens[i];
+        index++;
     }
 
-    if (type_left == MULTIPLICATION || type_left == DIVISION)
-    {
-        return true;
-    }
+    printf("\n\n");
+    print_tokens(token_with_placeholders);
 
-    return false;
+    free(buffer);
 }
 
-bool check_next_token_mul_or_div(const token_t* tokens, const int index)
+void execute_tokens(const token_t* tokens)
 {
-    type_t next_token = UNINITIALIZED;
-    if (index + 1 < SIZE_TOKENS)
-    {
-        next_token = tokens[index + 1].type;
-    }
+    int parenthese_level = 0;
 
-    if (next_token == MULTIPLICATION || next_token == DIVISION)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-//Need to check left side?
-bool check_left_token_number(const token_t* tokens, const int index)
-{
-    type_t type_left = UNINITIALIZED;
-    if (index + 1 < SIZE_TOKENS)
-    {
-        type_left = tokens[index + 1].type;
-    } //Needs case if index+1 > SIZE_TOKENS
-
-    if (type_left == NUMBER)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool check_next_token_number(const token_t* tokens, const int index)
-{
-    type_t next_token = UNINITIALIZED;
-    if (index + 1 < SIZE_TOKENS)
-    {
-        next_token = tokens[index + 1].type;
-    }
-
-    if (next_token == NUMBER)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-void construct_number_with_multiple_digits(section_t* section, const type_t type, const char number_c)
-{
-    if (section->token_arr == nullptr)
-    {
-        section->size = 1;
-        *section = (section_t) {
-            .token_arr = malloc(sizeof(token_t) * section->size),
-            .size = section->size + 1,
-            .type = type,
-        };
-    }
-    else
-    {
-        section->token_arr = realloc(section->token_arr, sizeof(token_t) * section->size);
-        section->token_arr[section->size - 1] = number_c;
-        section->size += 1;
-    }
-}
-
-void translate_into_formula(const token_t* tokens)
-{
-    token_t* token_buffer = malloc(sizeof(token_t) * 10);
-    int token_buffer_index = 0;
-    bool parentheses = false;
-
-    static section_t* section = nullptr;
+    char number_buffer[] = "000";
+    int index_number_buffer = 2;
 
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
         const char token_c = tokens[i].token_c;
         const type_t type = tokens[i].type;
 
-        if (type == PARENTHESE_CLOSE)
+        if (type == UNINITIALIZED)
         {
-            parentheses = false;
             break;
         }
 
-        if (parentheses)
-        {
-            token_buffer[token_buffer_index] = tokens[i];
-            token_buffer_index++;
-        }
-
-        if (type == UNINITIALIZED) break;
         if (type == PARENTHESE_OPEN)
         {
-            parentheses = true;
+            parenthese_level++;
             continue;
         }
 
-        if (type == NUMBER)
+        if (type == PARENTHESE_CLOSE)
         {
-            if (check_left_token_number(tokens, i))
-            {
-                construct_number_with_multiple_digits(section, type, token_c);
-            }
-            if (check_next_token_number(tokens, i))
-            {
-                construct_number_with_multiple_digits(section, type, token_c);
-            }
+            parenthese_level--;
+            break;
+        }
+
+        if (type == PLACEHOLDER_NUMBER)
+        {
         }
 
         if (type == ADDITION || type == SUBTRACTION)
         {
-            if (check_left_token_mul_or_div(tokens, i))
-            {
-
-            }
-            if (check_next_token_mul_or_div(tokens, i))
+            if (check_is_token_mul_or_div(tokens, i))
             {
 
             }
@@ -155,6 +108,37 @@ void translate_into_formula(const token_t* tokens)
 
         }
     }
+}
 
-    free(token_buffer);
+bool check_is_token_mul_or_div(const token_t* tokens, const int index)
+{
+    type_t next_token = UNINITIALIZED;
+    if (index < SIZE_TOKENS)
+    {
+        next_token = tokens[index].type;
+    }
+
+    if (next_token == MULTIPLICATION || next_token == DIVISION)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool check_is_token_number(const token_t* tokens, const int index)
+{
+    type_t next_token = UNINITIALIZED;
+    if (index < SIZE_TOKENS)
+    {
+        next_token = tokens[index].type;
+    }
+
+    if (next_token == NUMBER)
+    {
+        return true;
+    }
+
+    return false;
 }

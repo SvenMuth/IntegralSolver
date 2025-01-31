@@ -11,7 +11,7 @@
 #include "tokenizer.h"
 #include "commons.h"
 
-token_t* tokenize(const char* integral)
+token_t* default_initialization_tokens()
 {
     token_t* tokens = malloc(sizeof(token_t) * SIZE_TOKENS);
     if (tokens == nullptr)
@@ -27,6 +27,13 @@ token_t* tokenize(const char* integral)
             .type = UNINITIALIZED
         };
     }
+
+    return tokens;
+}
+
+token_t* tokenize(const char* integral)
+{
+    token_t* tokens = default_initialization_tokens();
 
     int token_index = 0;
     type_t type = UNINITIALIZED;
