@@ -7,6 +7,7 @@
 
 #include "process_tokens.h"
 #include "commons.h"
+#include "math.h"
 
 void clear_char_buffer(char* buffer)
 {
@@ -33,13 +34,14 @@ void construct_number_buffer(char* buffer, char number, int digit)
     }
 }
 
-void strip_numbers_token(token_t* tokens)
+void strip_numbers_token(token_t* tokens, token_t* token_with_placeholders, int* numbers)
 {
-    token_t* token_with_placeholders = default_initialization_tokens();
     int index = 0;
 
     char buffer[4];
     clear_char_buffer(buffer);
+
+    int numbers_index = 0;
 
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
@@ -47,24 +49,27 @@ void strip_numbers_token(token_t* tokens)
         {
 
             int digit = 1;
-            int tmp = i + 1;
-            construct_number_buffer(buffer, tokens[i].token_c, digit);
+            int tmp = i;
+
             while (check_is_token_number(tokens, tmp))
             {
-                digit++;
                 construct_number_buffer(buffer, tokens[tmp].token_c, digit);
+                digit++;
                 tmp++;
             }
 
-            i = tmp;
-            const int number = (int)strtol(buffer, nullptr, 10);
-            printf("%d\n", number);
+            i = tmp - 1;
+
+            numbers[numbers_index] = (int)strtol(buffer, nullptr, 10);
+            numbers_index++;
 
             token_with_placeholders[index] = (token_t){'%', PLACEHOLDER_NUMBER};
             index++;
+
             clear_char_buffer(buffer);
             continue;
         }
+
         token_with_placeholders[index] = tokens[i];
         index++;
     }
@@ -73,9 +78,16 @@ void strip_numbers_token(token_t* tokens)
     print_tokens(token_with_placeholders);
 }
 
-void execute_tokens(const token_t* tokens)
+void execute_tokens(token_t* tokens, const int* numbers, double* result)
 {
     int parenthese_level = 0;
+    int numbers_index = 0;
+
+    double number_placeholder_left = 0;
+    bool is_placeholder_left = false;
+
+    double number_placeholder_right = 0;
+    bool is_placeholder_right = false;
 
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
@@ -101,27 +113,56 @@ void execute_tokens(const token_t* tokens)
 
         if (type == PLACEHOLDER_NUMBER)
         {
+            if (!is_placeholder_left)
+            {
+                number_placeholder_left = numbers[numbers_index];
+                is_placeholder_left = true;
+                numbers_index++;
+                continue;
+            }
+            if (!is_placeholder_right)
+            {
+                number_placeholder_right = numbers[numbers_index];
+                is_placeholder_right = true;
+            }
+            numbers_index++;
         }
 
         if (type == ADDITION || type == SUBTRACTION)
         {
-            if (check_is_token_mul_or_div(tokens, i))
+            if (!is_placeholder_right)
             {
-
+                number_placeholder_right = numbers[numbers_index];
+                numbers_index++;
+            }
+            //5 + 3 * 2
+            //5 + 3 + 2
+            if (type == ADDITION)
+            {
+                *result = add(number_placeholder_left ,number_placeholder_right);
+            }
+            if (type == SUBTRACTION)
+            {
+                *result = subtract(number_placeholder_left ,number_placeholder_right);
             }
         }
         if (type == MULTIPLICATION)
         {
-
+            *result = multiply(number_placeholder_left, number_placeholder_right);
         }
         if (type == DIVISION)
         {
-
+            *result = divide(number_placeholder_left, number_placeholder_right);
+        }
+        if (type == ADDITION || type == SUBTRACTION ||type == MULTIPLICATION || type == DIVISION)
+        {
+            number_placeholder_left = *result;
+            is_placeholder_right = false;
         }
     }
 }
 
-bool check_is_token_mul_or_div(const token_t* tokens, const int index)
+bool check_is_token_mul_or_div(token_t* tokens, const int index)
 {
     type_t next_token = UNINITIALIZED;
     if (index < SIZE_TOKENS)
@@ -138,7 +179,7 @@ bool check_is_token_mul_or_div(const token_t* tokens, const int index)
 }
 
 
-bool check_is_token_number(const token_t* tokens, const int index)
+bool check_is_token_number(token_t* tokens, const int index)
 {
     type_t next_token = UNINITIALIZED;
     if (index < SIZE_TOKENS)

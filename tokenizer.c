@@ -103,16 +103,17 @@ void print_tokens(const token_t* tokens)
 
         switch (type)
         {
-        case NUMBER:            type_str = "NUMBER";            break;
-        case VARIABLE:          type_str = "VARIABLE";          break;
-        case EXPONENT:          type_str = "EXPONENT";          break;
-        case MULTIPLICATION:    type_str = "MULTIPLICATION";    break;
-        case DIVISION:          type_str = "DIVISION";          break;
-        case ADDITION:          type_str = "ADDITION";          break;
-        case SUBTRACTION:       type_str = "SUBTRACTION";       break;
-        case POWER:             type_str = "POWER";             break;
-        case PARENTHESE_OPEN:   type_str = "PARENTHESE_OPEN";   break;
-        case PARENTHESE_CLOSE:  type_str = "PARENTHESE_CLOSE";  break;
+        case NUMBER:                type_str = "NUMBER";                break;
+        case VARIABLE:              type_str = "VARIABLE";              break;
+        case EXPONENT:              type_str = "EXPONENT";              break;
+        case PLACEHOLDER_NUMBER:    type_str = "PLACEHOLDER_NUMBER";    break;
+        case MULTIPLICATION:        type_str = "MULTIPLICATION";        break;
+        case DIVISION:              type_str = "DIVISION";              break;
+        case ADDITION:              type_str = "ADDITION";              break;
+        case SUBTRACTION:           type_str = "SUBTRACTION";           break;
+        case POWER:                 type_str = "POWER";                 break;
+        case PARENTHESE_OPEN:       type_str = "PARENTHESE_OPEN";       break;
+        case PARENTHESE_CLOSE:      type_str = "PARENTHESE_CLOSE";      break;
         default: break;
         }
 

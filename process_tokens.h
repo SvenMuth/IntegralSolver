@@ -7,17 +7,15 @@
 
 #include "tokenizer.h"
 
-typedef struct char_buffer
-{
-    char buffer[4];
-    size_t length;
-}char_buffer_t;
 
-void strip_numbers_token(token_t* tokens);
-void execute_tokens(const token_t* tokens);
+void clear_char_buffer(char* buffer);
+void construct_number_buffer(char* buffer, char number, int digit);
 
-bool check_is_token_mul_or_div(const token_t* tokens, int index);
-bool check_is_token_number(const token_t* tokens, int index);
+void strip_numbers_token(token_t* tokens, token_t* token_with_placeholders, int* numbers);
+void execute_tokens(token_t* tokens, const int* numbers, double* result);
+
+bool check_is_token_mul_or_div(token_t* tokens, int index);
+bool check_is_token_number(token_t* tokens, int index);
 
 
 
