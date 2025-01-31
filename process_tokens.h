@@ -7,6 +7,12 @@
 
 #include "tokenizer.h"
 
+typedef struct char_buffer
+{
+    char buffer[4];
+    size_t length;
+}char_buffer_t;
+
 void strip_numbers_token(token_t* tokens);
 void execute_tokens(const token_t* tokens);
 

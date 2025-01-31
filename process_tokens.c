@@ -3,50 +3,66 @@
 //
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "process_tokens.h"
 #include "commons.h"
 
+void clear_char_buffer(char* buffer)
+{
+    memset(&buffer[0], '0', sizeof(buffer));
+    buffer[3] = '\0';
+}
+
+void construct_number_buffer(char* buffer, char number, int digit)
+{
+    if (digit == 1)
+    {
+        buffer[2] = number;
+    }
+    if (digit == 2)
+    {
+        buffer[1] = buffer[2];
+        buffer[2] = number;
+    }
+    if (digit == 3)
+    {
+        buffer[0] = buffer[1] ;
+        buffer[1] = buffer[2] ;
+        buffer[2] = number;
+    }
+}
 
 void strip_numbers_token(token_t* tokens)
 {
     token_t* token_with_placeholders = default_initialization_tokens();
     int index = 0;
 
-    int tmp = -1;
-    int digits = 1;
-    char* buffer = nullptr;
+    char buffer[4];
+    clear_char_buffer(buffer);
+
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
         if (tokens[i].type == NUMBER)
         {
-            int index_buffer = 0;
-            digits = 1;
 
-            buffer = malloc(sizeof(char) * digits);
-            buffer[index_buffer] = tokens[i].token_c;
-
-            tmp = i + 1;
+            int digit = 1;
+            int tmp = i + 1;
+            construct_number_buffer(buffer, tokens[i].token_c, digit);
             while (check_is_token_number(tokens, tmp))
             {
-                index_buffer++;
-                digits++;
-
-                buffer = realloc(buffer, sizeof(char) * digits);
-                buffer[index_buffer] = tokens[tmp].token_c;
+                digit++;
+                construct_number_buffer(buffer, tokens[tmp].token_c, digit);
                 tmp++;
             }
 
-            i = tmp + 1;
-
-            digits++;
-            index_buffer++;
-            buffer = realloc(buffer, sizeof(char) * digits);
-            buffer[index_buffer] = 0;
-            int number = (int)strtol(buffer, nullptr, 10);
+            i = tmp;
+            const int number = (int)strtol(buffer, nullptr, 10);
+            printf("%d\n", number);
 
             token_with_placeholders[index] = (token_t){'%', PLACEHOLDER_NUMBER};
             index++;
+            clear_char_buffer(buffer);
             continue;
         }
         token_with_placeholders[index] = tokens[i];
@@ -55,16 +71,11 @@ void strip_numbers_token(token_t* tokens)
 
     printf("\n\n");
     print_tokens(token_with_placeholders);
-
-    free(buffer);
 }
 
 void execute_tokens(const token_t* tokens)
 {
     int parenthese_level = 0;
-
-    char number_buffer[] = "000";
-    int index_number_buffer = 2;
 
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
