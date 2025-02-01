@@ -28,13 +28,13 @@ void construct_number_buffer(char* buffer, char number, int digit)
     }
     if (digit == 3)
     {
-        buffer[0] = buffer[1] ;
-        buffer[1] = buffer[2] ;
+        buffer[0] = buffer[1];
+        buffer[1] = buffer[2];
         buffer[2] = number;
     }
 }
 
-void strip_numbers_token(token_t* tokens, token_t* token_with_placeholders, int* numbers)
+void strip_numbers_token(token_t* tokens, token_t* token_with_placeholders, double* numbers)
 {
     int index = 0;
 
@@ -47,7 +47,6 @@ void strip_numbers_token(token_t* tokens, token_t* token_with_placeholders, int*
     {
         if (tokens[i].type == NUMBER)
         {
-
             int digit = 1;
             int tmp = i;
 
@@ -78,18 +77,20 @@ void strip_numbers_token(token_t* tokens, token_t* token_with_placeholders, int*
     print_tokens(token_with_placeholders);
 }
 
-void execute_tokens(token_t* tokens, const int* numbers, double* result, double* x)
+void execute_tokens(token_t* tokens, double* numbers, double* result, double* x)
 {
     int parenthese_level = 0;
     int numbers_index = 0;
 
-    //double number_placeholder_left = 0;
-    //bool is_placeholder_left = false;
+    bool is_mul_or_div = false;
 
-    //double number_placeholder_right = 0;
-    //bool is_placeholder_right = false;
+    for (int i = 0; i < 4; i++)
+    {
+        printf("%f\n", numbers[i]);
+    }
 
-    bool is_variable_and_power = false;
+    *result = numbers[numbers_index];
+    numbers_index++;
 
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
@@ -103,108 +104,90 @@ void execute_tokens(token_t* tokens, const int* numbers, double* result, double*
 
         if (type == PARENTHESE_OPEN)
         {
+            printf("PARENTHESE_OPEN\n");
             parenthese_level++;
             continue;
         }
 
         if (type == PARENTHESE_CLOSE)
         {
+            printf("PARENTHESE_CLOSE\n");
             parenthese_level--;
-            break;
+            continue;
         }
 
         if (type == VARIABLE)
         {
-            if (check_is_token_power(tokens, i + 1))
-            {
-                is_variable_and_power = true;
-            }
-            //3x
-            //4 + 3x
-            //4 + 3x - 5
-            //if (is_placeholder_left)
-            //{
-
-            //}
-            //if (is_placeholder_right)
-            //{
-
-            //}
+            printf("VARIABLE\n");
         }
 
-        //if (type == POWER)
-        //{
-        //    is_power = true;
-        //    continue;
-        //}
-
-        if (type == PLACEHOLDER_NUMBER)
+        if (tokens[i + 2].type  == POWER)
         {
-            if (!is_placeholder_left)
-            {
-                number_placeholder_left = numbers[numbers_index];
-                is_placeholder_left = true;
-                numbers_index++;
-                continue;
-            }
-            if (!is_placeholder_right)
-            {
-                number_placeholder_right = numbers[numbers_index];
-                is_placeholder_right = true;
-                numbers_index++;
-                continue;
-            }
+            printf("POWER\n");
+            //3 + 4 ^ 2 + 2
+            numbers[numbers_index + 1] = power(numbers[numbers_index], (int)numbers[numbers_index + 1]);
+            numbers_index++;
         }
-
-
-        //if (is_power)
-        //{
-        //    power(number_placeholder_left, (int)number_placeholder_right);
-        //}
 
         if (type == ADDITION || type == SUBTRACTION)
         {
-            if (!is_placeholder_right)
+            int counter_mul_or_div = 0;
+            // 3 + 4 * 4 * 3 + 2
+            int tmp = i + 2;
+            while (check_is_token_mul(tokens, tmp))
             {
-                number_placeholder_right = numbers[numbers_index];
-                numbers_index++;
+                printf("MULTIPLICATION\n");
+                numbers[numbers_index] = multiply(numbers[numbers_index], numbers[numbers_index + 1]);
+                is_mul_or_div = true;
+                counter_mul_or_div++;
+                tmp += 2;
             }
-            //5 + 3 * 2
-            //5 + 3 + 2
+            while (check_is_token_div(tokens, tmp))
+            {
+                printf("DIVISION\n");
+                numbers[numbers_index] = divide(numbers[numbers_index], numbers[numbers_index + 1]);
+                is_mul_or_div = true;
+                counter_mul_or_div++;
+                tmp += 2;
+            }
+
+            i = tmp - 2;
+
             if (type == ADDITION)
             {
-                *result = add(number_placeholder_left ,number_placeholder_right);
+                printf("ADDITION\n");
+                *result = add(*result, numbers[numbers_index]);
+                numbers_index++;
             }
             if (type == SUBTRACTION)
             {
-                *result = subtract(number_placeholder_left ,number_placeholder_right);
+                printf("SUBTRACTION\n");
+                *result = subtract(*result, numbers[numbers_index]);
+                numbers_index++;
+            }
+
+            if (is_mul_or_div)
+            {
+                numbers_index += counter_mul_or_div;
             }
         }
+
         if (type == MULTIPLICATION)
         {
-            *result = multiply(number_placeholder_left, number_placeholder_right);
+            printf("MULTIPLICATION\n");
+            *result = multiply(*result, numbers[numbers_index]);
+            numbers_index++;
         }
         if (type == DIVISION)
         {
-            *result = divide(number_placeholder_left, number_placeholder_right);
-        }
-
-        //if (is_power)
-        //{
-        //    number_placeholder_left = *result;
-        //    is_placeholder_right = false;
-        //    is_power = false;
-        //}
-
-        if (type == ADDITION || type == SUBTRACTION || type == MULTIPLICATION || type == DIVISION)
-        {
-            number_placeholder_left = *result;
-            is_placeholder_right = false;
+            printf("DIVISION\n");
+            *result = divide(*result, numbers[numbers_index]);
+            numbers_index++;
         }
     }
 }
 
-bool check_is_token_mul_or_div(token_t* tokens, const int index)
+bool check_is_token_mul(token_t* tokens, const int index)
 {
     type_t next_token = UNINITIALIZED;
     if (index < SIZE_TOKENS)
@@ -212,7 +195,7 @@ bool check_is_token_mul_or_div(token_t* tokens, const int index)
         next_token = tokens[index].type;
     }
 
-    if (next_token == MULTIPLICATION || next_token == DIVISION)
+    if (next_token == MULTIPLICATION)
     {
         return true;
     }
@@ -220,6 +203,21 @@ bool check_is_token_mul_or_div(token_t* tokens, const int index)
     return false;
 }
 
+bool check_is_token_div(token_t* tokens, const int index)
+{
+    type_t next_token = UNINITIALIZED;
+    if (index < SIZE_TOKENS)
+    {
+        next_token = tokens[index].type;
+    }
+
+    if (next_token == DIVISION)
+    {
+        return true;
+    }
+
+    return false;
+}
 
 bool check_is_token_number(token_t* tokens, const int index)
 {
