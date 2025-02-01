@@ -78,16 +78,18 @@ void strip_numbers_token(token_t* tokens, token_t* token_with_placeholders, int*
     print_tokens(token_with_placeholders);
 }
 
-void execute_tokens(token_t* tokens, const int* numbers, double* result)
+void execute_tokens(token_t* tokens, const int* numbers, double* result, double* x)
 {
     int parenthese_level = 0;
     int numbers_index = 0;
 
-    double number_placeholder_left = 0;
-    bool is_placeholder_left = false;
+    //double number_placeholder_left = 0;
+    //bool is_placeholder_left = false;
 
-    double number_placeholder_right = 0;
-    bool is_placeholder_right = false;
+    //double number_placeholder_right = 0;
+    //bool is_placeholder_right = false;
+
+    bool is_variable_and_power = false;
 
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
@@ -111,6 +113,31 @@ void execute_tokens(token_t* tokens, const int* numbers, double* result)
             break;
         }
 
+        if (type == VARIABLE)
+        {
+            if (check_is_token_power(tokens, i + 1))
+            {
+                is_variable_and_power = true;
+            }
+            //3x
+            //4 + 3x
+            //4 + 3x - 5
+            //if (is_placeholder_left)
+            //{
+
+            //}
+            //if (is_placeholder_right)
+            //{
+
+            //}
+        }
+
+        //if (type == POWER)
+        //{
+        //    is_power = true;
+        //    continue;
+        //}
+
         if (type == PLACEHOLDER_NUMBER)
         {
             if (!is_placeholder_left)
@@ -124,9 +151,16 @@ void execute_tokens(token_t* tokens, const int* numbers, double* result)
             {
                 number_placeholder_right = numbers[numbers_index];
                 is_placeholder_right = true;
+                numbers_index++;
+                continue;
             }
-            numbers_index++;
         }
+
+
+        //if (is_power)
+        //{
+        //    power(number_placeholder_left, (int)number_placeholder_right);
+        //}
 
         if (type == ADDITION || type == SUBTRACTION)
         {
@@ -154,7 +188,15 @@ void execute_tokens(token_t* tokens, const int* numbers, double* result)
         {
             *result = divide(number_placeholder_left, number_placeholder_right);
         }
-        if (type == ADDITION || type == SUBTRACTION ||type == MULTIPLICATION || type == DIVISION)
+
+        //if (is_power)
+        //{
+        //    number_placeholder_left = *result;
+        //    is_placeholder_right = false;
+        //    is_power = false;
+        //}
+
+        if (type == ADDITION || type == SUBTRACTION || type == MULTIPLICATION || type == DIVISION)
         {
             number_placeholder_left = *result;
             is_placeholder_right = false;
@@ -188,6 +230,22 @@ bool check_is_token_number(token_t* tokens, const int index)
     }
 
     if (next_token == NUMBER)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool check_is_token_power(token_t* tokens, const int index)
+{
+    type_t next_token = UNINITIALIZED;
+    if (index < SIZE_TOKENS)
+    {
+        next_token = tokens[index].type;
+    }
+
+    if (next_token == POWER)
     {
         return true;
     }

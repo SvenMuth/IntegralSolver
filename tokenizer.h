@@ -12,14 +12,14 @@ typedef enum type
     EXPONENT,
     UNINITIALIZED,
 
-    PLACEHOLDER_NUMBER  = 37,
-    PARENTHESE_OPEN     = 40,
-    PARENTHESE_CLOSE    = 41,
-    MULTIPLICATION      = 42,
-    ADDITION            = 43,
-    SUBTRACTION         = 45,
-    DIVISION            = 47,
-    POWER               = 94,
+    PLACEHOLDER_NUMBER  = 37, //'%'
+    PARENTHESE_OPEN     = 40, //'('
+    PARENTHESE_CLOSE    = 41, //')'
+    MULTIPLICATION      = 42, //'*'
+    ADDITION            = 43, //'+'
+    SUBTRACTION         = 45, //'-'
+    DIVISION            = 47, //'/'
+    POWER               = 94, //'^'
 } type_t;
 
 typedef struct token
@@ -30,7 +30,7 @@ typedef struct token
 
 token_t* default_initialization_tokens(void);
 token_t* tokenize(const char* integral);
-void generate_token(token_t* token, type_t type, char content);
+void set_token(token_t* token, type_t type, char content);
 void print_tokens(const token_t* tokens);
 
 #endif //TOKENIZER_H

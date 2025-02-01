@@ -72,7 +72,7 @@ token_t* tokenize(const char* integral)
         default: break;
         }
 
-        generate_token(&tokens[token_index], type, c);
+        set_token(&tokens[token_index], type, c);
         token_index++;
     }
 
@@ -81,20 +81,19 @@ token_t* tokenize(const char* integral)
     return tokens;
 }
 
-void generate_token(token_t* token, type_t type, const char content)
+void set_token(token_t* token, type_t type, const char content)
 {
-    *token = (token_t) {
-        .token_c = content,
-        .type = type,
-    };
+    token->token_c = content;
+    token->type= type;
 }
 
 void print_tokens(const token_t* tokens)
 {
-    char* type_str = nullptr;
     type_t type = UNINITIALIZED;
     for (int i = 0; i < SIZE_TOKENS; i++)
     {
+        static char type_str[20];
+
         type = tokens[i].type;
         if (type == UNINITIALIZED)
         {
@@ -103,17 +102,17 @@ void print_tokens(const token_t* tokens)
 
         switch (type)
         {
-        case NUMBER:                type_str = "NUMBER";                break;
-        case VARIABLE:              type_str = "VARIABLE";              break;
-        case EXPONENT:              type_str = "EXPONENT";              break;
-        case PLACEHOLDER_NUMBER:    type_str = "PLACEHOLDER_NUMBER";    break;
-        case MULTIPLICATION:        type_str = "MULTIPLICATION";        break;
-        case DIVISION:              type_str = "DIVISION";              break;
-        case ADDITION:              type_str = "ADDITION";              break;
-        case SUBTRACTION:           type_str = "SUBTRACTION";           break;
-        case POWER:                 type_str = "POWER";                 break;
-        case PARENTHESE_OPEN:       type_str = "PARENTHESE_OPEN";       break;
-        case PARENTHESE_CLOSE:      type_str = "PARENTHESE_CLOSE";      break;
+        case NUMBER:                strncpy(type_str,"NUMBER",20);              break;
+        case VARIABLE:              strncpy(type_str,"VARIABLE",20);            break;
+        case EXPONENT:              strncpy(type_str,"EXPONENT",20);            break;
+        case PLACEHOLDER_NUMBER:    strncpy(type_str,"PLACEHOLDER_NUMBER",20);  break;
+        case MULTIPLICATION:        strncpy(type_str,"MULTIPLICATION",20);      break;
+        case DIVISION:              strncpy(type_str,"DIVISION",20);            break;
+        case ADDITION:              strncpy(type_str,"ADDITION",20);            break;
+        case SUBTRACTION:           strncpy(type_str,"SUBTRACTION",20);         break;
+        case POWER:                 strncpy(type_str,"POWER",20);               break;
+        case PARENTHESE_OPEN:       strncpy(type_str,"PARENTHESE_OPEN",20);     break;
+        case PARENTHESE_CLOSE:      strncpy(type_str,"PARENTHESE_CLOSE",20);    break;
         default: break;
         }
 
